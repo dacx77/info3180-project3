@@ -1,3 +1,4 @@
+
 """
 Flask Documentation:     http://flask.pocoo.org/docs/
 Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
@@ -20,11 +21,11 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from app import app, db, lm, oid
 from app import oid, lm
 
+
 class ProfileForm(Form):
      first_name = TextField('First Name', validators=[Required()])
      last_name = TextField('Last Name', validators=[Required()])
-     # evil, don't do this
-     image = TextField('Image', validators=[Required(), Email()])
+     
 
 
 @app.before_request
@@ -55,30 +56,34 @@ def home():
 
 @app.route('/profile/', methods=['POST','GET'])
 def profile_add():
+    import os
+    from flask import Flask, request, redirect, url_for
+    from werkzeug import secure_filename
     if request.method == 'POST':
         first_name = request.form['first_name']
         last_name = request.form['last_name']
-
+        sex = request.form['sex']
+        image = request.files['image']
+        
+        filename = secure_filename(image.filename)
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        
         # write the information to the database
-        newprofile = Myprofile(first_name=first_name,
-                               last_name=last_name)
+        newprofile = Myprofile(first_name=first_name,last_name=last_name,sex=sex, image=filename)
         db.session.add(newprofile)
         db.session.commit()
 
-        return "{} {} was added to the database".format(request.form['first_name'],
-                                             request.form['last_name'])
+        return "{} {}, who is a {} was added to the database with image: {}".format(request.form['first_name'],request.form['last_name'],request.form['sex'], filename)
 
     form = ProfileForm()
-    return render_template('profile_add.html',
-                           form=form)
+    return render_template('profile_add.html',form=form)
 
 @app.route('/profiles/',methods=["POST","GET"])
 def profile_list():
     profiles = Myprofile.query.all()
     if request.method == "POST":
         return jsonify({"age":4, "name":"John"})
-    return render_template('profile_list.html',
-                            profiles=profiles)
+    return render_template('profile_list.html',profiles=profiles)
 
 @app.route('/profile/<int:id>')
 def profile_view(id):
