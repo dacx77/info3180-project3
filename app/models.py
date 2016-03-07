@@ -4,7 +4,9 @@ class Myprofile(db.Model):
     first_name = db.Column(db.String(80))     
     last_name = db.Column(db.String(80))
     sex = db.Column(db.String(80))
-    image = db.Column(db.String(80))
+    image = db.Column(db.String(150))
+    high_score = db.Column(db.String(80))
+    tdollars = db.Column(db.String(80))
     #nickname = db.Column(db.String(80), unique=True)    
     #email = db.Column(db.String(120), index=True, unique=True)
  
@@ -26,4 +28,4 @@ class Myprofile(db.Model):
             return str(self.id)  # python 3 support
 
     def __repr__(self):
-        return '<User %r>' % (self.nickname)
+        return '{%s : %d}' % ("User", self.id)

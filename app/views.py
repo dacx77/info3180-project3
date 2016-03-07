@@ -64,12 +64,14 @@ def profile_add():
         last_name = request.form['last_name']
         sex = request.form['sex']
         image = request.files['image']
+        high_score = ""
+        tdollars = ""
         
         filename = secure_filename(image.filename)
         image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         
         # write the information to the database
-        newprofile = Myprofile(first_name=first_name,last_name=last_name,sex=sex, image=filename)
+        newprofile = Myprofile(first_name=first_name,last_name=last_name,sex=sex, image=filename, high_score=high_score, tdollars=tdollars)
         db.session.add(newprofile)
         db.session.commit()
 
@@ -80,14 +82,22 @@ def profile_add():
 
 @app.route('/profiles/',methods=["POST","GET"])
 def profile_list():
+    import json
     profiles = Myprofile.query.all()
-    if request.method == "POST":
-        return jsonify({"age":4, "name":"John"})
+    if request.method == "GET":
+        profList = str(profiles)
+        
+        return jsonify({"users":profList})
+            #return jsonify({"id":[i].id, "sex":[i].sex, "image":[i].image, "high_score":[i].high_score, "tdollars":[i].tdollars})
     return render_template('profile_list.html',profiles=profiles)
 
-@app.route('/profile/<int:id>')
+@app.route('/profile/<int:id>',methods=["POST","GET"])
 def profile_view(id):
     profile = Myprofile.query.get(id)
+    if request.method == "GET":
+        return jsonify({"data":"no instructions for GET"})
+    if request.method == "POST":
+        return jsonify({"id":profile.id, "sex":profile.sex, "image":profile.image, "high_score":profile.high_score, "tdollars":profile.tdollars})
     return render_template('profile_view.html',profile=profile)
 
 
